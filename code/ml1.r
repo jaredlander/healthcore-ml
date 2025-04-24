@@ -257,3 +257,8 @@ spec_xg_1 <- boost_tree(
     )
 
 spec_xg_1
+
+# Workflows for Boosted Trees ####
+
+flow_xg_1 <- workflow(preprocessor = rec_xg_1, spec = spec_xg_1)
+flow_xg_1
