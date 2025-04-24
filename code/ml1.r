@@ -4,6 +4,7 @@ library(ggplot2)
 library(dplyr)
 library(gglander)
 library(rsample)
+library(yardstick)
 
 # Data ####
 
@@ -71,4 +72,9 @@ cv_split
 cv_split$splits[[1]]
 cv_split$splits[[1]]
 
+## Choose Loss Function ####
 
+# {yardstick}
+
+loss_fn <- metric_set(accuracy, roc_auc, mn_log_loss)
+loss_fn
