@@ -11,6 +11,7 @@ library(workflows)
 library(dials)
 library(tune)
 library(tictoc)
+library(coefplot)
 
 # only available in R 4.5+
 use('themis', c('step_downsample'))
@@ -198,3 +199,24 @@ tune_glm_1 |> autoplot(metric='roc_auc')
 
 tune_glm_1 |> show_best(metric='roc_auc', n = 10)
 tune_glm_1 |> select_best(metric = 'roc_auc')
+tune_glm_1 |> select_by_one_std_err(metric = 'roc_auc', -penalty)
+best_params_glm_1 <- tune_glm_1 |> select_by_one_std_err(metric = 'roc_auc', -penalty)
+best_params_glm_1$penalty
+
+tune_glm_1 |> show_best(metric='accuracy', n = 10)
+
+flow_1
+
+mod_glm_1 <- flow_1 |> 
+    finalize_workflow(parameters = best_params_glm_1)
+mod_glm_1
+
+fitted_glm_1 <- fit(mod_glm_1, data=train)
+fitted_glm_1
+
+# visualize with {coefplot}
+class(fitted_glm_1)
+class(fitted_glm_1$fit$fit)
+fitted_glm_1 |> 
+    extract_fit_engine() |> 
+    coefplot(lambda=best_params_glm_1$penalty, sort='magnitude', trans = exp)
