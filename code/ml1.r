@@ -12,6 +12,7 @@ library(dials)
 library(tune)
 library(tictoc)
 library(coefplot)
+library(future)
 
 # only available in R 4.5+
 use('themis', c('step_downsample'))
@@ -253,7 +254,8 @@ spec_xg_1 <- boost_tree(
     set_engine(
         engine='xgboost',
         # num_parallel_trees=5
-        scale_pos_weight=2.55
+        scale_pos_weight=2.55,
+        nthread=1
     )
 
 spec_xg_1
@@ -288,3 +290,24 @@ grid_xg_1 |>
         .by=tree_depth
     ) |> 
     dplyr::arrange(tree_depth)
+
+# Tuning Boosted Trees ####
+
+# {tune} and {future}
+
+parallelly::availableWorkers()
+parallelly::availableCores()
+
+plan(multisession, workers=4)
+
+tic(msg='xg1')
+tune_xg_1 <- tune_grid(
+    flow_xg_1,
+    resamples = cv_split,
+    grid=grid_xg_1,
+    metrics=loss_fn,
+    control = control_grid(verbose=TRUE, allow_par = TRUE, parallel_over = 'everything')
+)
+toc(log=TRUE)
+
+plan(sequential)
