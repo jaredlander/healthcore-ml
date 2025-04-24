@@ -276,3 +276,15 @@ params_xg_1 <- flow_xg_1 |>
         trees=trees(range = c(5, 200)),
         tree_depth=tree_depth(range = c(2, 12))
     )
+
+grid_xg_1 <- grid_space_filling(params_xg_1, type = 'max_entropy', size=100)
+grid_xg_1
+
+grid_xg_1 |> dplyr::count(tree_depth)
+
+grid_xg_1 |> 
+    dplyr::summarize(
+        count=dplyr::n(), min_trees=min(trees), max_trees=max(trees),
+        .by=tree_depth
+    ) |> 
+    dplyr::arrange(tree_depth)
