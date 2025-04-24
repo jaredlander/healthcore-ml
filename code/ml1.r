@@ -7,6 +7,7 @@ library(rsample)
 library(yardstick)
 library(recipes)
 library(parsnip)
+library(workflows)
 
 # only available in R 4.5+
 use('themis', c('step_downsample'))
@@ -146,3 +147,17 @@ gen_additive_mod()
 # library(multilevelmod)
 
 poisson_reg()
+
+spec_glm_1 <- logistic_reg(engine='glmnet', penalty = tune())
+spec_glm_1
+
+# Combine Feature Engineering and Model Spec for Penalized Regression ####
+
+# {workflows}
+
+flow_1 <- workflow(preprocessor = rec_glm_1, spec = spec_glm_1)
+flow_1
+
+# Tuning Parameters for Penalized Regression ####
+
+# {
