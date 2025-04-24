@@ -185,3 +185,16 @@ tune_glm_1 <- tune_grid(
     control = control_grid(verbose = TRUE)
 )
 toc(log=TRUE)
+
+tic.log()
+
+tune_glm_1
+tune_glm_1$.metrics[[1]]
+
+tune_glm_1 |> collect_metrics()
+tune_glm_1 |> collect_metrics() |> dplyr::filter(.metric == 'roc_auc')
+tune_glm_1 |> autoplot()
+tune_glm_1 |> autoplot(metric='roc_auc')
+
+tune_glm_1 |> show_best(metric='roc_auc', n = 10)
+tune_glm_1 |> select_best(metric = 'roc_auc')
