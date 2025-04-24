@@ -5,6 +5,7 @@ library(dplyr)
 library(gglander)
 library(rsample)
 library(yardstick)
+library(recipes)
 
 # Setttings ####
 options(tidymodels.dark=TRUE)
@@ -89,3 +90,24 @@ loss_fn
 # L2 (ridge) regression
 # elastic net
 
+# Feature Engineering ####
+
+# {recipes}
+
+credit
+rec_glm_1 <- recipe(Status ~ ., data=train) |> 
+    themis::step_downsample(Status, under_ratio = 1.2) |> 
+    step_nzv(all_predictors()) |> 
+    # step_naomit(all_predictors()) |> 
+    step_impute_knn(all_numeric_predictors()) |> 
+    # step_mutate(age_orig=Age) |> 
+    step_cut(Age, breaks=c(5, 18, 35, 45)) |> 
+    step_normalize(all_numeric_predictors()) |> 
+    # step_discretize(Age, min_unique=5) |> 
+    step_unknown(all_nominal_predictors(), new_level='missing') |> 
+    step_other(all_nominal_predictors(), other='misc') |> 
+    step_novel(all_nominal_predictors(), new_level='unseen') |> 
+    step_dummy(all_nominal_predictors(), one_hot = TRUE)
+rec_glm_1
+
+rec_glm_1 |> prep() |> bake(new_data = NULL)
