@@ -234,3 +234,26 @@ rec_xg_1 <- recipe(Status ~ ., data=train) |>
     step_novel(all_nominal_predictors(), new_level = 'unseen') |> 
     step_dummy(all_nominal_predictors(), one_hot = TRUE)
 rec_xg_1
+
+# Model Spec for Boosted Trees ####
+
+# {parsnip}
+
+train |> dplyr::count(Status, sort = TRUE)
+2560/1003
+
+spec_xg_1 <- boost_tree(
+    mode='classification', 
+    trees=tune(),
+    tree_depth = tune(),
+    sample_size = 0.7,
+    mtry=0.7,
+    stop_iter=30
+) |> 
+    set_engine(
+        engine='xgboost',
+        # num_parallel_trees=5
+        scale_pos_weight=2.55
+    )
+
+spec_xg_1
