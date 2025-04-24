@@ -260,5 +260,19 @@ spec_xg_1
 
 # Workflows for Boosted Trees ####
 
+
+# {workflows}
+
 flow_xg_1 <- workflow(preprocessor = rec_xg_1, spec = spec_xg_1)
 flow_xg_1
+
+# Parameters for Boosted Trees ####
+
+# {dials}
+
+params_xg_1 <- flow_xg_1 |> 
+    extract_parameter_set_dials() |> 
+    update(
+        trees=trees(range = c(5, 200)),
+        tree_depth=tree_depth(range = c(2, 12))
+    )
