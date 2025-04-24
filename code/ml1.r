@@ -9,6 +9,8 @@ library(recipes)
 library(parsnip)
 library(workflows)
 library(dials)
+library(tune)
+library(tictoc)
 
 # only available in R 4.5+
 use('themis', c('step_downsample'))
@@ -169,3 +171,17 @@ params_glm_1$object
 grid_glm_1 <- params_glm_1 |> 
     grid_random(size=100) |> 
     dplyr::mutate(mixture=round(mixture, digits=1))
+
+# Tune the Penalized Regression Model ####
+
+# {tune} and {tictoc}
+
+tic(msg = 'glm1')
+tune_glm_1 <- tune_grid(
+    flow_1,
+    resamples = cv_split,
+    grid=grid_glm_1,
+    metrics = loss_fn,
+    control = control_grid(verbose = TRUE)
+)
+toc(log=TRUE)
