@@ -3,6 +3,7 @@
 library(ggplot2)
 library(dplyr)
 library(gglander)
+library(rsample)
 
 # Data ####
 
@@ -12,6 +13,8 @@ credit
 ?modeldata::credit_data
 
 # EDA ####
+
+# {ggplot2} and {dplyr}
 
 credit |> count(Marital)
 credit |> count(Home)
@@ -30,3 +33,29 @@ ggplot(credit, aes(x=log(Income), y=log(Amount), color=Job)) +
     geom_point(show.legend = FALSE) + 
     geom_smooth(show.legend = FALSE) + 
     facet_wrap(~Job)
+ggplot(credit, aes(x=log(Income), y=log(Amount), color=Job)) + 
+    geom_jitter(shape=10, size=1, alpha=2/3, show.legend = FALSE) + 
+    geom_smooth(show.legend = FALSE) + 
+    facet_wrap(~Job)
+
+# ML Process Setup ####
+
+# - Create a train/test split
+# - Setup cross-validation
+# - Choose a loss function (performance metric like RMSE, MAE, Accuracy)
+
+## Split the Data ####
+
+# {rsample}
+
+set.seed(1234)
+credit_split <- initial_split(credit, prop = 0.8, strata = 'Status')
+credit_split
+credit_split$data
+credit_split$in_id
+credit_split$out_id
+credit_split$id
+credit[credit_split$in_id, ]
+
+train <- training(credit_split)
+test <- testing(credit_split)
