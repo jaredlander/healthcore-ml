@@ -220,3 +220,17 @@ class(fitted_glm_1$fit$fit)
 fitted_glm_1 |> 
     extract_fit_engine() |> 
     coefplot(lambda=best_params_glm_1$penalty, sort='magnitude', trans = exp)
+
+# America/New_York
+
+# Feature Engineering for Boosted Trees ####
+
+# {recipes}
+
+rec_xg_1 <- recipe(Status ~ ., data=train) |> 
+    step_nzv(all_predictors()) |> 
+    step_unknown(all_nominal_predictors(), new_level = 'missing') |> 
+    step_other(all_nominal_predictors(), other = 'misc') |> 
+    step_novel(all_nominal_predictors(), new_level = 'unseen') |> 
+    step_dummy(all_nominal_predictors(), one_hot = TRUE)
+rec_xg_1
