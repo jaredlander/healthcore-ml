@@ -59,3 +59,16 @@ credit[credit_split$in_id, ]
 
 train <- training(credit_split)
 test <- testing(credit_split)
+
+initial_validation_split(credit_data)
+
+## Cross-Validation ####
+
+# {rsample}
+
+cv_split <- vfold_cv(train, v=5, repeats=2, strata='Status')
+cv_split
+cv_split$splits[[1]]
+cv_split$splits[[1]]
+
+
