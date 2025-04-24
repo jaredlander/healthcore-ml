@@ -6,6 +6,9 @@ library(gglander)
 library(rsample)
 library(yardstick)
 
+# Setttings ####
+options(tidymodels.dark=TRUE)
+
 # Data ####
 
 data(credit_data, package = 'modeldata')
@@ -78,3 +81,11 @@ cv_split$splits[[1]]
 
 loss_fn <- metric_set(accuracy, roc_auc, mn_log_loss)
 loss_fn
+
+# Penlized Regression ####
+
+# regularized regression
+# L1 (lasso) regression
+# L2 (ridge) regression
+# elastic net
+
