@@ -248,14 +248,17 @@ spec_xg_1 <- boost_tree(
     trees=tune(),
     tree_depth = tune(),
     sample_size = 0.7,
-    mtry=0.7,
+    mtry=1,
+    # mtry=0.7,
     stop_iter=30
 ) |> 
     set_engine(
         engine='xgboost',
         # num_parallel_trees=5
         scale_pos_weight=2.55,
-        nthread=1
+        nthread=4
+        # tree_method='gpu_hist',
+        # device='cuda'
     )
 
 spec_xg_1
@@ -306,8 +309,46 @@ tune_xg_1 <- tune_grid(
     resamples = cv_split,
     grid=grid_xg_1,
     metrics=loss_fn,
-    control = control_grid(verbose=TRUE, allow_par = TRUE, parallel_over = 'everything')
+    control = control_grid(verbose=TRUE, allow_par = FALSE, parallel_over = 'everything')
 )
 toc(log=TRUE)
 
 plan(sequential)
+
+tune_xg_1
+tune_xg_1 |> show_notes()
+
+tune_xg_1 |> collect_metrics()
+tune_xg_1 |> autoplot(metric='roc_auc')
+tune_xg_1 |> show_best(metric='roc_auc')
+tune_glm_1 |> show_best(metric='roc_auc')
+
+best_params_xg_1 <- tune_xg_1 |> select_by_one_std_err(metric='roc_auc', tree_depth)
+
+mod_xg_1 <- finalize_workflow(flow_xg_1, parameters = best_params_xg_1)
+mod_xg_1
+
+fitted_xg_1 <- fit(mod_xg_1, data=train)
+fitted_xg_1 |> 
+    vip::vip()
+
+# Compare Final Models to Each Other ####
+
+# {tune}
+
+eval_glm_1 <- last_fit(mod_glm_1, split = credit_split, metrics = loss_fn)
+eval_xg_1 <- last_fit(mod_xg_1, split = credit_split, metrics = loss_fn)
+eval_glm_1
+eval_xg_1
+
+dplyr::bind_rows(
+    eval_glm_1 |> collect_metrics() |> dplyr::mutate(mod='glm_1'),
+    eval_xg_1 |> collect_metrics() |> dplyr::mutate(mod='xg_1')
+) |> 
+    dplyr::filter(.metric == 'roc_auc')
+
+# Use Winning Model ####
+
+champion <- fit(mod_xg_1, data=credit)
+champion
+
