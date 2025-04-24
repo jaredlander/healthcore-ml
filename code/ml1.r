@@ -352,3 +352,9 @@ dplyr::bind_rows(
 champion <- fit(mod_xg_1, data=credit)
 champion
 
+# Predict on New Data ####
+
+new_customers <- readr::read_csv('https://jaredlander.com/data/new-credit-customers.csv')
+
+preds_champ <- predict(champion, new_data = new_customers, type='prob')
+preds_champ
