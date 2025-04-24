@@ -6,6 +6,10 @@ library(gglander)
 library(rsample)
 library(yardstick)
 library(recipes)
+library(parsnip)
+
+# only available in R 4.5+
+use('themis', c('step_downsample'))
 
 # Setttings ####
 options(tidymodels.dark=TRUE)
@@ -90,13 +94,14 @@ loss_fn
 # L2 (ridge) regression
 # elastic net
 
-# Feature Engineering ####
+# Feature Engineering for Penalized Regression ####
 
 # {recipes}
 
 credit
 rec_glm_1 <- recipe(Status ~ ., data=train) |> 
     themis::step_downsample(Status, under_ratio = 1.2) |> 
+    # themis::step_upsample()
     step_nzv(all_predictors()) |> 
     # step_naomit(all_predictors()) |> 
     step_impute_knn(all_numeric_predictors()) |> 
@@ -105,9 +110,39 @@ rec_glm_1 <- recipe(Status ~ ., data=train) |>
     step_normalize(all_numeric_predictors()) |> 
     # step_discretize(Age, min_unique=5) |> 
     step_unknown(all_nominal_predictors(), new_level='missing') |> 
-    step_other(all_nominal_predictors(), other='misc') |> 
+    step_other(all_nominal_predictors(), other='misc', threshold = 0.05) |> 
     step_novel(all_nominal_predictors(), new_level='unseen') |> 
     step_dummy(all_nominal_predictors(), one_hot = TRUE)
 rec_glm_1
 
 rec_glm_1 |> prep() |> bake(new_data = NULL)
+rec_glm_1 |> prep() |> bake(new_data = NULL, -Status, composition = 'dgCMatrix')
+
+# Model Specification for Penalized Regression ####
+
+# {parsnip}
+
+# lm(y ~ x, data)
+# glmnet::glmnet(x, y)
+
+linear_reg()
+linear_reg(engine='lm')
+linear_reg(engine='glmnet')
+linear_reg(engine='stan')
+linear_reg(engine='spark')
+linear_reg(engine='keras')
+linear_reg(engine='brulee')
+
+rand_forest()
+boost_tree()
+
+logistic_reg()
+logistic_reg(engine='glmnet')
+
+survival_reg()
+censored::survival_prob_coxnet()
+
+gen_additive_mod()
+# library(multilevelmod)
+
+poisson_reg()
