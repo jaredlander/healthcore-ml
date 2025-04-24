@@ -8,6 +8,7 @@ library(yardstick)
 library(recipes)
 library(parsnip)
 library(workflows)
+library(dials)
 
 # only available in R 4.5+
 use('themis', c('step_downsample'))
@@ -148,7 +149,7 @@ gen_additive_mod()
 
 poisson_reg()
 
-spec_glm_1 <- logistic_reg(engine='glmnet', penalty = tune())
+spec_glm_1 <- logistic_reg(engine='glmnet', penalty = tune(), mixture = tune())
 spec_glm_1
 
 # Combine Feature Engineering and Model Spec for Penalized Regression ####
@@ -160,4 +161,11 @@ flow_1
 
 # Tuning Parameters for Penalized Regression ####
 
-# {
+# {dials}
+
+params_glm_1 <- flow_1 |> extract_parameter_set_dials()
+params_glm_1$object
+
+grid_glm_1 <- params_glm_1 |> 
+    grid_random(size=100) |> 
+    dplyr::mutate(mixture=round(mixture, digits=1))
