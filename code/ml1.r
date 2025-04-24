@@ -358,3 +358,31 @@ new_customers <- readr::read_csv('https://jaredlander.com/data/new-credit-custom
 
 preds_champ <- predict(champion, new_data = new_customers, type='prob')
 preds_champ
+
+predict(champion, new_data = new_customers, type='class')
+
+# Make Model into an API ####
+
+# qs2::qs_save(champion, 'fitted/champion.qs')
+
+v_champ <- vetiver::vetiver_model(champion, model_name = 'best_xg')
+v_champ
+v_champ$metadata
+
+plumber::pr() |> 
+    vetiver::vetiver_api(v_champ, path='class', type='class') |> 
+    vetiver::vetiver_api(v_champ, path='probability', type='prob') |> 
+    plumber::pr_run(port = 9188)
+
+
+# Expose More Models ####
+
+runnerup <- fit(mod_glm_1, data=credit)
+v_runnerup <- vetiver::vetiver_model(runnerup, model_name = 'best_glm')
+
+plumber::pr() |> 
+    vetiver::vetiver_api(v_champ, path='champ/class', type='class') |> 
+    vetiver::vetiver_api(v_champ, path='champ/probability', type='prob') |> 
+    vetiver::vetiver_api(v_runnerup, path='runnerup/class', type='class') |> 
+    vetiver::vetiver_api(v_runnerup, path='runnerup/probability', type='prob') |> 
+    plumber::pr_run(port = 9188)
